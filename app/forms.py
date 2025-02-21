@@ -27,3 +27,22 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Запомни меня')
     submit = SubmitField('Login')
+
+class EditProfileForm(FlaskForm):
+    username = StringField('Имя пользователя', validators=[DataRequired(), Length(min=2, max=35)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Новый пароль (необязательно)')
+    confirm_password = PasswordField('Подтвердите пароль', validators=[EqualTo('password')])
+    submit = SubmitField('Сохранить изменения')
+
+    def validate_username(self, username):
+        if username.data != current_user.username:
+            user = User.query.filter_by(username=username.data).first()
+            if user:
+                raise ValidationError('Это имя уже занято.')
+
+    def validate_email(self, email):
+        if email.data != current_user.email:
+            user = User.query.filter_by(email=email.data).first()
+            if user:
+                raise ValidationError('Этот email уже используется.')
